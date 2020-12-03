@@ -8,6 +8,8 @@
 
 ## Key Ideas
 
+Introduced Probability Density
+
 ## Main Body
 
 ### Why Parallelize?
@@ -30,22 +32,44 @@ In this paper, the authors increased the fidelity of WaveNet by making some chan
 
 ### Inverse-Autoregressive Flows (IAF)
 
-A different architecture to support rapid, parallel generation of audio samples was needed. A Normalizing Flow is a transformation of a simple probability distribution (e.g., a standard normal) into a more complex distribution by a sequence of **invertible and differentiable** mappings. The name *normalizing flow* can be interpreted as the following:
+A different architecture to support rapid, parallel generation of audio samples was needed. A Normalizing Flow is a **transformation** of a simple probability distribution (e.g., a standard normal) into a more complex distribution by a sequence of **invertible and differentiable** mappings. The name *normalizing flow* can be interpreted as the following:
 
 1. **Normalizing** means that the change of variables gives a normalized density after applying an invertible transformation.
 2. **Flow** means that the invertible transformations can be composed with each other to create more complex invertible transformations.
 
+Normalizing flows provide a general way of constructing **flexible** probability distributions over continuous random variables.
+
+***Change of variables formula:***
+
+z ~ p(z)   (Simple distribution)
+
+x ~ p(x)   (Complex distribution)
+
+x = f<sub>t</sub>(z) = f<sub>t</sub> * f<sub>t-1</sub> . . . * f<sub>0</sub>(z)
+$$
+p_\theta(x) = p_\theta(z) |det(\frac{\partial z}{\partial x}) |
+$$
+The magnitude of the Jacobian determinant which indicates **how much a transformation expands or contracts space** makes sure that the integration of the resulting probability density (p(x)) is always equal to 1. 
+
 Inverse autoregressive flow (IAF), is a type of normalizing flow that scales well to high-dimensional latent spaces. The proposed flow consists of a chain of invertible transformations, where each transformation is **based on an autoregressive neural network**. 
+
+The transformation f is typically chosen so that it is invertible and its Jacobian determinant is easy to compute.
 
 ![](../Images/eq.png)
 
-[Need more clarity for this equation]
+Normalising flows might require repeated iterations to transform uncorrelated noise into structured samples.
 
-
+![](/home/kritianandan/Papers/Images/iteration.png)
 
 ### Probability Density Distillation
 
 ![](../Images/Distilledmodel.png)
+
+Here, we use an already trained autoregressive WaveNet model i.e. teacher (p<sub>t</sub>(x)) and a parallel WaveNet i.e. student (p<sub>s</sub>(x)) which learns from the teacher. White noise is fed to the
+
+This architecture looks similar to that of GANs except here the teacher isn't conflicting with the student but guides the student to match the teacher's probabilities.
+
+Kullback–Leibler divergence (D<sub>KL</sub>) measures how much one distribution differs from the other. It is also referred to as relative entropy. 
 
 ### Additional Loss Terms
 
